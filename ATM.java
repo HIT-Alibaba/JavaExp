@@ -115,7 +115,9 @@ public class ATM  {
 					FileWriter writer = new FileWriter("/home/soufii/userInfo");
 					for (int i = 0; i < userArr.length; i++) {
 						writer.write(userArr[i]);
+						writer.flush();
 					}
+					
 					writer.close();
 					break;
 			}
@@ -170,8 +172,8 @@ public class ATM  {
 					User.saveToATM(10000);
 					for (int i = 0; i < nuserArr.length; i++) {
 						writer.write(nuserArr[i]);
+						writer.flush();
 					}
-					writer.close();
 					break;
 				case 3:
 					System.out.print("");
@@ -188,11 +190,13 @@ public class ATM  {
 					}
 					for (int i = 0; i < userArr.length; i++) {
 						writer.write(userArr[i]);
+						writer.flush();
 					}
-					writer.close();
+					
 					break;
 				case 0:
 					isLoop = false;
+					writer.close();
 					break;
 			}
 		}
@@ -270,7 +274,8 @@ class Record {
 	public void save(String id, int opt, String time) {
 		FileWriter writer = new FileWriter("/home/soufii/record", true);  
 		String s = Integer.toString(opt); 
-		writer.write(id + "#" + s + "#" + time + "\n");  
+		writer.write(id + "#" + s + "#" + time + "\n");
+		writer.flush();  
         writer.close(); 
 	}
 	public String id;
