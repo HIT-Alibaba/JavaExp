@@ -78,7 +78,7 @@ public class ATM  {
 					String opwd = in.nextLine();
 					if (opwd == pwd) {
 						String npwd = in.nextLine();
-						if (npwd.length >= 6)
+						if (npwd.length >= 6 && npwd % 111111 != 0)
 						user.chgPwd(npwd);
 					}
 					break;
@@ -127,7 +127,7 @@ public class ATM  {
 					String opwd = in.nextLine();
 					if (opwd == pwd)
 						String npwd = in.nextLine();
-						if (npwd.length >= 6)
+						if (npwd.length >= 6 && npwd % 111111 != 0)
 						user.chgPwd(npwd);
 					break;
 				case 0:
