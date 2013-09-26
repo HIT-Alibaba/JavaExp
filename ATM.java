@@ -82,18 +82,35 @@ public class ATM  {
 					System.out.print('\n');
 					break;
 				case 2:
-					System.out.print("存多少？");
+					
+					while(true) {
+						System.out.print("存多少？");
 					n = in.nextInt();
-					user.save(n);
-					nmoney = Integer.toString(user.getMoney());
-					userArr[num] = user.id + "#" + user.pwd + "#" + Integer.toString(user.money) + "#" + "hq" + "#" + user.time + "\n";
+						if (n < 2000 && n % 100 == 0){
+							user.save(n);
+							nmoney = Integer.toString(user.getMoney());
+							userArr[num] = user.id + "#" + user.pwd + "#" + Integer.toString(user.money) + "#" + "hq" + "#" + user.time;
+							break;
+						} else {
+							System.out.print("格式错误!");
+						}	
+					}
 					break;
 				case 3:
-					System.out.print("取多少?");
+					
+					while(true) {
+						System.out.print("取多少?");
 					n= in.nextInt();
-					user.pick(n);
-					nmoney = Integer.toString(user.getMoney());
-					userArr[num] = user.id + "#" + user.pwd + "#" + Integer.toString(user.money) + "#" + "hq" + "#" + user.time + "\n";
+						if (n < 2000 && n % 100 == 0){
+							user.pick(n);
+							nmoney = Integer.toString(user.getMoney());
+							userArr[num] = user.id + "#" + user.pwd + "#" + Integer.toString(user.money) + "#" + "hq" + "#" + user.time;
+							break;
+						} else {
+							System.out.print("格式错误!");
+						}	
+					}
+					
 					break;
 				case 4:
 					User.getInfo(user.getId());
@@ -103,11 +120,17 @@ public class ATM  {
 					Scanner inin = new Scanner(System.in);
 					String opwd = inin.nextLine();
 					if (opwd.equals( user.pwd)) {
-						System.out.print("新密码:");
+						
+						while (true) {
+							System.out.print("新密码:");
 						String npwd = inin.nextLine();
-						if (npwd.length() >= 6 && Integer.parseInt(npwd) % 111111 != 0) {
-							user.chgPwd(npwd);
-							userArr[num] = user.id + "#" + npwd + "#" + user.money + '#' + "hq" + "#" + user.time + "\n";
+							if (npwd.length() >= 6 && Integer.parseInt(npwd) % 111111 != 0) {
+								user.chgPwd(npwd);
+								userArr[num] = user.id + "#" + npwd + "#" + user.money + '#' + "hq" + "#" + user.time;
+								break;
+							} else {
+								System.out.print("格式错误！");
+							}
 						}
 					}
 
@@ -116,8 +139,10 @@ public class ATM  {
 					isLoop = false;
 					FileWriter writer = new FileWriter("/home/soufii/JavaExp/userInfo");
 					for (int i = 0; i < userArr.length; i++) {
-						writer.write(userArr[i] + "\n");
-						writer.flush();
+						if (userArr[i].length() != 0) {
+							writer.write(userArr[i] + "\n");
+							writer.flush();
+						}
 					}
 					
 					writer.close();
@@ -138,7 +163,6 @@ public class ATM  {
 		}
 		User.allMoney = money;
 		Boolean isLoop = true;
-		FileWriter writer = new FileWriter("/home/soufii/JavaExp/userInfo");
 		while (isLoop) {
 			System.out.print("1. 所有用户信息\n");
 			System.out.print("2. 创建新号\n");
@@ -171,12 +195,16 @@ public class ATM  {
 					for (int i = 0; i < userArr.length; i++) {
 						nuserArr[i] = userArr[i];
 					}
-					nuserArr[userArr.length] = nid + "#" + npwd + "#" + "10000" + "#" + "hq" + "#" + ntime + "\n";
+					nuserArr[userArr.length] = nid + "#" + npwd + "#" + "10000" + "#" + "hq" + "#" + ntime;
 					User.saveToATM(10000);
+					FileWriter writer = new FileWriter("/home/soufii/JavaExp/userInfo");
 					for (int i = 0; i < nuserArr.length; i++) {
-						writer.write(nuserArr[i] + "\n");
+						if (nuserArr[i].length() != 0) {
+							writer.write(nuserArr[i] + "\n");
+							writer.flush();
+						}
 					}
-					writer.flush();
+					writer.close();
 					break;
 				case 3:
 					System.out.print(User.getAllMoney());
@@ -184,23 +212,33 @@ public class ATM  {
 					break;
 				case 4:
 					System.out.print("旧密码:");
-					String opwd = in.nextLine();
+					Scanner inin0 = new Scanner(System.in);
+					String opwd = inin0.nextLine();
 					if (opwd .equals( pwd)) {
-						System.out.print("新密码");
-						npwd = in.nextLine();
-						if (npwd.length() >= 6 && Integer.parseInt(npwd) % 111111 != 0) {
-							userArr[num] = id + "#" + npwd + "#" + '0' + "#" + "admin" + "#" + time + "\n";
+						
+						while(true) {
+							System.out.print("新密码");
+						npwd = inin0.nextLine();
+							if (npwd.length() >= 6 && Integer.parseInt(npwd) % 111111 != 0) {
+								userArr[num] = id + "#" + npwd + "#" + '0' + "#" + "admin" + "#" + time;
+								break;
+							} else {
+								System.out.print("格式错误！");
+							}
 						}
-					}
-					for (int i = 0; i < userArr.length; i++) {
-						writer.write(userArr[i]);
-						writer.flush();
 					}
 					
 					break;
 				case 0:
 					isLoop = false;
-					writer.close();
+					FileWriter writes = new FileWriter("/home/soufii/JavaExp/userInfo");
+					for (int i = 0; i < userArr.length; i++) {
+						if (userArr[i].length() != 0) {
+							writes.write(userArr[i] + "\n");
+							writes.flush();
+						}
+					}
+					writes.close();
 					break;
 			}
 		}
