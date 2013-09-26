@@ -11,7 +11,6 @@ public class ATM  {
 			i++;
 			infos.nextLine();
 		}
-System.out.print(i);
 		String[] userArr = new String[i + 1];
 		i = 0;
 		Scanner infos1 = new Scanner(new File("/home/soufii/JavaExp/userInfo"));
@@ -47,7 +46,6 @@ System.out.print(i);
 					isAdmin = true;
 				}
 				time = tokens.nextToken();
-				System.out.print(num);
 
 				showMenu(isAdmin, id, pwd, money, type, time, userArr, num);
 				isLogin = true;
@@ -81,6 +79,7 @@ System.out.print(i);
 			switch (choose) {
 				case 1:
 					System.out.print(user.getMoney());
+					System.out.print('\n');
 					break;
 				case 2:
 					System.out.print("存多少？");
@@ -176,12 +175,12 @@ System.out.print(i);
 					User.saveToATM(10000);
 					for (int i = 0; i < nuserArr.length; i++) {
 						writer.write(nuserArr[i] + "\n");
-						System.out.print(nuserArr[i]);
 					}
 					writer.flush();
 					break;
 				case 3:
 					System.out.print(User.getAllMoney());
+					System.out.print('\n');
 					break;
 				case 4:
 					System.out.print("旧密码:");
@@ -222,7 +221,6 @@ class User {
 	public void save(int money) throws IOException {
 		this.money += money;
 		allMoney += money;
-System.out.print(this.money);
 		Record record = new Record(id);
 		Date now = new Date();
 		DateFormat stamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM); 
@@ -273,7 +271,7 @@ class Record {
 			line = info.nextLine();
 			StringTokenizer tokens = new StringTokenizer(line,"#");
 			if (id .equals( tokens.nextToken())) {
-				System.out.print(line);
+				System.out.print(line + '\n');
 			}
 		}
 	}
