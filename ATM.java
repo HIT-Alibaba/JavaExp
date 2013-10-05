@@ -163,6 +163,7 @@ public class ATM  {
 		}
 		User.allMoney = money;
 		Boolean isLoop = true;
+		Boolean newCreate = false;
 		while (isLoop) {
 			System.out.print("1. 所有用户信息\n");
 			System.out.print("2. 创建新号\n");
@@ -195,8 +196,9 @@ public class ATM  {
 					for (int i = 0; i < userArr.length; i++) {
 						nuserArr[i] = userArr[i];
 					}
-					nuserArr[userArr.length] = nid + "#" + npwd + "#" + "10000" + "#" + "hq" + "#" + ntime;
-					User.saveToATM(10000);
+					nuserArr[userArr.length] = nid + "#" + npwd + "#" + "0" + "#" + "hq" + "#" + ntime;
+					User.saveToATM(0);
+					newCreate = true;
 					FileWriter writer = new FileWriter("/home/soufii/JavaExp/userInfo");
 					for (int i = 0; i < nuserArr.length; i++) {
 						if (nuserArr[i].length() != 0) {
@@ -227,18 +229,46 @@ public class ATM  {
 							}
 						}
 					}
+					int i;
+					if (!newCreate) {
+						FileWriter writes = new FileWriter("/home/soufii/JavaExp/userInfo");
+						for (i = 0; i < userArr.length; i++) {
+							if (userArr[i].length() != 0) {
+								writes.write(userArr[i] + "\n");
+								writes.flush();
+							}
+						}
+						writes.close();
+					} else {
+						Scanner tInfo = new Scanner(new File("/home/soufii/JavaExp/userInfo"));
+						i = 0;
+						while (tInfo.hasNextLine()) {
+							tInfo.nextLine();
+							i++;
+						}
+				System.out.print(i);
+						String[] nnuserArr = new String[i + 1];
+						i = 0;
+						Scanner laInfo = new Scanner(new File("/home/soufii/JavaExp/userInfo"));
+						while (laInfo.hasNextLine()) {
+							nnuserArr[i] = laInfo.nextLine();
+							i++;
+						}
+						nnuserArr[num] = userArr[num];
+						FileWriter writess = new FileWriter("/home/soufii/JavaExp/userInfo");
+						for (i = 0; i < nnuserArr.length; i++) {
+							if (nnuserArr[i].length() != 0) {
+								writess.write(nnuserArr[i] + "\n");
+								writess.flush();
+							}
+						}
+						writess.close();
+					}
+						
 					
 					break;
 				case 0:
 					isLoop = false;
-					FileWriter writes = new FileWriter("/home/soufii/JavaExp/userInfo");
-					for (int i = 0; i < userArr.length; i++) {
-						if (userArr[i].length() != 0) {
-							writes.write(userArr[i] + "\n");
-							writes.flush();
-						}
-					}
-					writes.close();
 					break;
 			}
 		}
