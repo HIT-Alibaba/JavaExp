@@ -39,8 +39,7 @@ class SimpleFrame extends JFrame {
 		public void keyTyped(KeyEvent e) {}    
       	public void keyReleased(KeyEvent e) {}
 		public void keyPressed(KeyEvent e) {
-			char keyChar = e.getKeyChar();
-			switch (keyChar) {
+			switch (e.getKeyCode()) {
 				case KeyEvent.VK_1:
 					choRect = panel.rect1;
 					choNum = 1;
@@ -66,7 +65,7 @@ class SimpleFrame extends JFrame {
 					panel.color4 = Color.RED;
 					break;
 				case KeyEvent.VK_UP:
-					if (choRect != null && choRect.getY() > 0.0 && enabled(choRect, -50.0, false)) {
+					if (choRect != null /*&& choRect.getY() > 0.0 && enabled(choRect, -50.0, false)*/) {
 						switch (choNum) {
 							case 1:
 								panel.y1 -= 50.0;
@@ -84,7 +83,7 @@ class SimpleFrame extends JFrame {
 					}
 					break;
 				case KeyEvent.VK_DOWN:
-					if (choRect != null && choRect.getY() < 250.0 && enabled(choRect, 50.0, false)) {
+					if (choRect != null /*&& choRect.getY() < 250.0 && enabled(choRect, 50.0, false)*/) {
 						switch (choNum) {
 							case 1:
 								panel.y1 += 50.0;
@@ -102,7 +101,7 @@ class SimpleFrame extends JFrame {
 					}
 					break;
 				case KeyEvent.VK_LEFT:
-					if (choRect != null && choRect.getX() > 0.0 && enabled(choRect, -50.0, true)) {
+					if (choRect != null /*&& choRect.getX() > 0.0 && enabled(choRect, -50.0, true)*/) {
 						switch (choNum) {
 							case 1:
 								panel.x1 -= 50.0;
@@ -120,7 +119,7 @@ class SimpleFrame extends JFrame {
 					}
 					break;
 				case KeyEvent.VK_RIGHT:
-					if (choRect != null && choRect.getX() < 250.0 && enabled(choRect, 50.0, true)) {
+					if (choRect != null /*&& choRect.getX() < 250.0 && enabled(choRect, 50.0, true)*/) {
 						switch (choNum) {
 							case 1:
 								panel.x1 += 50.0;
