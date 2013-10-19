@@ -61,6 +61,8 @@ class CutPanel extends JPanel {
 
 	JProgressBar progressbar = new JProgressBar();
 
+	int realSize, currentSize;
+
 	public CutPanel() throws IOException{
 		setLayout(null);
 		JLabel nameLabel = new JLabel("文件名:"),
@@ -70,7 +72,7 @@ class CutPanel extends JPanel {
 			   tarLabel = new JLabel("保存目录:");
 		progressbar.setOrientation(JProgressBar.HORIZONTAL);
 		progressbar.setMinimum(0);
-		progressbar.setMaximum(100);
+		progressbar.setMaximum(1);
 		progressbar.setValue(0);
 		progressbar.setStringPainted(true);
 
@@ -125,7 +127,7 @@ class CutPanel extends JPanel {
 	private class Listener implements ActionListener {
 		private File targetpath = null, sourcefile = null;
 		private double blockBytes = 0.0;
-		public void actionPerformed(ActionEvent e) throws IOException{
+		public void actionPerformed(ActionEvent e) throws Exception{
 			if (rbtn1.isSelected())
 				blockBytes = 1.44 * 1024 * 1024;
 			if (rbtn2.isSelected())
@@ -159,12 +161,17 @@ class CutPanel extends JPanel {
 			}
 			if (e.getSource() == btCut) {
 				if (targetpath != null && sourcefile != null) {
+					Runnable bar = new ProgressBar();
+					Thread t = new Thread(bar);
+					t.start();
 					if (blockBytes >= sourcefile.length())
 			        	return;
 					FileInputStream fis = new FileInputStream(sourcefile.getPath());  
 			        byte[] b = new byte[(int)blockBytes];
+			        realSize = fis.available();
 			        int i = 0;
 			        while (fis.available() > 0) {
+			        	currentSize = realSize - fis.available();
 			        	i++;
 			        	fis.read(b);
 			        	FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
@@ -174,6 +181,12 @@ class CutPanel extends JPanel {
 			        fis.close();
 				}
 			}	
+		}
+	}
+
+	private class ProgressBar implements Runnable {
+		public void run() {
+			progressbar.setValue(currentSize / realSize);
 		}
 	}
 }
@@ -194,6 +207,8 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 
 	JFileChooser fileChooser = new JFileChooser();
 
+	int realSize, currentSize;
+
 	public MergePanel() throws IOException{
 		setLayout(null);
 		JLabel numLabel = new JLabel("文件数量"),
@@ -201,7 +216,7 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 			   tarLabel = new JLabel("目标文件:");
 		progressbar.setOrientation(JProgressBar.HORIZONTAL);
 		progressbar.setMinimum(0);
-		progressbar.setMaximum(100);
+		progressbar.setMaximum(1);
 		progressbar.setValue(0);
 		progressbar.setStringPainted(true);
 
@@ -236,14 +251,14 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 	private class Listener implements ActionListener {
 		private File targetfile = null;
 		private ArrayList<File> sourcefiles = new ArrayList<File>();
-		public void actionPerformed(ActionEvent e) throws IOException{
+		public void actionPerformed(ActionEvent e) throws Exception{
 			if (e.getSource() == btCho) {
 				fileChooser.setCurrentDirectory(new File("."));
 				fileChooser.setMultiSelectionEnabled(true);
 				int result = fileChooser.showOpenDialog(null);
 				if (result == JFileChooser.APPROVE_OPTION) {
-					//sourcefiles.AddRange(fileChooser.getSelectedFiles());
 					for (int i = 0; i < fileChooser.getSelectedFiles().length; i++) {
+						realSize += fileChooser.getSelectedFiles()[i].length();
 						sourcefiles.add(fileChooser.getSelectedFiles()[i]);
 						area.append(fileChooser.getSelectedFiles()[i].getPath() + '\n');
 					}
@@ -261,17 +276,21 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 				}
 				return;
 			}
-			/*if (e.getSource() == btClear) {
+			if (e.getSource() == btClear) {
 				area.setText("");
 				filenum.setText("");
-				sourcefiles = NULL;
-			}*/
+				sourcefiles = null;
+			}
 			if (e.getSource() == btMerge) {
 				if (targetfile != null && sourcefiles != null) {
+					Runnable bar = new ProgressBar();
+					Thread t = new Thread(bar);
+					t.start();
 					FileOutputStream fos = new FileOutputStream(targetfile.getPath());
 					int i = 0;
 					while (i < sourcefiles.size()) {
 						FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
+						currentSize = realSize - fis.available();
 						byte[] buf = new byte[fis.available()];
 						fos.write(buf);
 						fis.close();
@@ -280,6 +299,12 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 					fos.close();
 				}
 			}
+		}
+	}
+
+	private class ProgressBar implements Runnable {
+		public void run() {
+			progressbar.setValue(currentSize / realSize);
 		}
 	}
 }
