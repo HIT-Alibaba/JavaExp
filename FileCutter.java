@@ -35,8 +35,6 @@ class Frame extends JFrame {
 		tabPane.addTab("合并", mergePanel);
 		tabPane.setSelectedIndex(0);
 		add(tabPane);
-		//tabPane.addActionListener();
-		//cutPanel.addActionListener();
 	}
 }
 
@@ -127,7 +125,7 @@ class CutPanel extends JPanel {
 	private class Listener implements ActionListener {
 		private File targetpath = null, sourcefile = null;
 		private double blockBytes = 0.0;
-		public void actionPerformed(ActionEvent e) throws Exception{
+		public void actionPerformed(ActionEvent e) {
 			if (rbtn1.isSelected())
 				blockBytes = 1.44 * 1024 * 1024;
 			if (rbtn2.isSelected())
@@ -166,19 +164,21 @@ class CutPanel extends JPanel {
 					t.start();
 					if (blockBytes >= sourcefile.length())
 			        	return;
-					FileInputStream fis = new FileInputStream(sourcefile.getPath());  
-			        byte[] b = new byte[(int)blockBytes];
-			        realSize = fis.available();
-			        int i = 0;
-			        while (fis.available() > 0) {
-			        	currentSize = realSize - fis.available();
-			        	i++;
-			        	fis.read(b);
-			        	FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
-			        	fos.write(b);
-			        	fos.close();
-			        }
-			        fis.close();
+					try {
+						FileInputStream fis = new FileInputStream(sourcefile.getPath());  
+						byte[] b = new byte[(int)blockBytes];
+						realSize = fis.available();
+						int i = 0;
+						while (fis.available() > 0) {
+							currentSize = realSize - fis.available();
+							i++;
+							fis.read(b);
+							FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
+							fos.write(b);
+							fos.close();
+						} 
+						fis.close();
+					} catch (IOException err) {}
 				}
 			}	
 		}
@@ -244,14 +244,12 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 		area.setBounds(210, 120, 300, 200);
 		progressbar.setBounds(210, 400, 300, 20);
 		btTar.setBounds(420, 360, 50, 20);
-
-		//this.addActionListener(new Listener());
 	}
 
 	private class Listener implements ActionListener {
 		private File targetfile = null;
 		private ArrayList<File> sourcefiles = new ArrayList<File>();
-		public void actionPerformed(ActionEvent e) throws Exception{
+		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btCho) {
 				fileChooser.setCurrentDirectory(new File("."));
 				fileChooser.setMultiSelectionEnabled(true);
@@ -286,17 +284,19 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 					Runnable bar = new ProgressBar();
 					Thread t = new Thread(bar);
 					t.start();
-					FileOutputStream fos = new FileOutputStream(targetfile.getPath());
-					int i = 0;
-					while (i < sourcefiles.size()) {
-						FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
-						currentSize = realSize - fis.available();
-						byte[] buf = new byte[fis.available()];
-						fos.write(buf);
-						fis.close();
-						i++;
-					}
-					fos.close();
+					try {
+						FileOutputStream fos = new FileOutputStream(targetfile.getPath());
+						int i = 0;
+						while (i < sourcefiles.size()) {
+							FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
+							currentSize = realSize - fis.available();
+							byte[] buf = new byte[fis.available()];
+							fos.write(buf);
+							fis.close();
+							i++;
+						}
+						fos.close();
+					} catch (IOException err) {}
 				}
 			}
 		}
