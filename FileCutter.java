@@ -2,9 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 
 public class FileCutter {
-	public static void main (String[] args) {
+	public static void main (String[] args) throws IOException{
 		Frame frame = new Frame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -12,7 +13,7 @@ public class FileCutter {
 }
 
 class Frame extends JFrame {
-	public Frame() {
+	public Frame() throws IOException{
 		Toolkit kit = Toolkit.getDefaultToolkit();
 		Dimension screenSize = kit.getScreenSize();
 		int screenW = screenSize.width;
@@ -60,7 +61,7 @@ class CutPanel extends JPanel {
 
 	JProgressBar progressbar = new JProgressBar();
 
-	public CutPanel() {
+	public CutPanel() throws IOException{
 		setLayout(null);
 		JLabel nameLabel = new JLabel("文件名:"),
 			   sizeLabel = new JLabel("文件大小(byte):"),
@@ -122,9 +123,9 @@ class CutPanel extends JPanel {
 	}
 	
 	private class Listener implements ActionListener {
-		private File targetpath = NULL, sourcefile = NULL;
-		private int blockBytes = 0;
-		public void actionPerformed(ActionEvent e) {
+		private File targetpath = null, sourcefile = null;
+		private double blockBytes = 0.0;
+		public void actionPerformed(ActionEvent e) throws IOException{
 			if (rbtn1.isSelected())
 				blockBytes = 1.44 * 1024 * 1024;
 			if (rbtn2.isSelected())
@@ -138,18 +139,18 @@ class CutPanel extends JPanel {
 			}
 			if (e.getSource() == btCho) {
 				fileChooser.setCurrentDirectory(new File("."));
-				int result = fileChooser.showOpenDialog();
+				int result = fileChooser.showOpenDialog(null);
 				if (result == JFileChooser.APPROVE_OPTION) {
 					sourcefile = fileChooser.getSelectedFile();
 					filename.setText(sourcefile.getPath());
-					filesize.setText(sourcefile.length());
+					filesize.setText(Long.toString(sourcefile.length()));
 				}
 				return;
 			}
 			if (e.getSource() == btTar) {
 				fileChooser.setCurrentDirectory(new File("."));
 				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				int result = fileChooser.showSaveDialog();
+				int result = fileChooser.showSaveDialog(null);
 				if (result == JFileChooser.APPROVE_OPTION) {
 					targetpath = fileChooser.getSelectedFile();
 					tarPath.setText(targetpath.getPath());
@@ -157,8 +158,20 @@ class CutPanel extends JPanel {
 				return;
 			}
 			if (e.getSource() == btCut) {
-				if (targetpath != NULL && sourcefile != NULL) {
-					//执行分割
+				if (targetpath != null && sourcefile != null) {
+					if (blockBytes >= sourcefile.length())
+			        	return;
+					FileInputStream fis = new FileInputStream(sourcefile.getPath());  
+			        byte[] b = new byte[(int)blockBytes];
+			        int i = 0;
+			        while (fis.available() > 0) {
+			        	i++;
+			        	fis.read(b);
+			        	FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
+			        	fos.write(b);
+			        	fos.close();
+			        }
+			        fis.close();
 				}
 			}	
 		}
@@ -181,7 +194,7 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 
 	JFileChooser fileChooser = new JFileChooser();
 
-	public MergePanel() {
+	public MergePanel() throws IOException{
 		setLayout(null);
 		JLabel numLabel = new JLabel("文件数量"),
 			   collectLabel = new JLabel("要合并的文件:"),
@@ -221,35 +234,51 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 	}
 
 	private class Listener implements ActionListener {
-		private File targetfile = NULL, sourcefiles[] = NULL;
-		public void actionPerformed(ActionEvent e) {
+		private File targetfile = null;
+		private ArrayList<File> sourcefiles = new ArrayList<File>();
+		public void actionPerformed(ActionEvent e) throws IOException{
 			if (e.getSource() == btCho) {
 				fileChooser.setCurrentDirectory(new File("."));
 				fileChooser.setMultiSelectionEnabled(true);
-				int result = fileChooser.showOpenDialog();
+				int result = fileChooser.showOpenDialog(null);
 				if (result == JFileChooser.APPROVE_OPTION) {
-					sourcefile = fileChooser.getSelectedFiles();
-					
+					//sourcefiles.AddRange(fileChooser.getSelectedFiles());
+					for (int i = 0; i < fileChooser.getSelectedFiles().length; i++) {
+						sourcefiles.add(fileChooser.getSelectedFiles()[i]);
+						area.append(fileChooser.getSelectedFiles()[i].getPath() + '\n');
+					}
+					sourcefiles.trimToSize();
+					filenum.setText(Long.toString(sourcefiles.size()));
 				}
 				return;
 			}
 			if (e.getSource() == btTar) {
 				fileChooser.setCurrentDirectory(new File("."));
-				int result = fileChooser.showSaveDialog();
+				int result = fileChooser.showSaveDialog(null);
 				if (result == JFileChooser.APPROVE_OPTION) {
-					targetpath = fileChooser.getSelectedFile();
-					tarPath.setText(targetpath.getPath());
+					targetfile = fileChooser.getSelectedFile();
+					tarfile.setText(targetfile.getPath());
 				}
 				return;
 			}
-			if (e.getSource() == btClear) {
-
-			}
-			if (e.getSource() == btRemove) {
-
-			}
+			/*if (e.getSource() == btClear) {
+				area.setText("");
+				filenum.setText("");
+				sourcefiles = NULL;
+			}*/
 			if (e.getSource() == btMerge) {
-
+				if (targetfile != null && sourcefiles != null) {
+					FileOutputStream fos = new FileOutputStream(targetfile.getPath());
+					int i = 0;
+					while (i < sourcefiles.size()) {
+						FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
+						byte[] buf = new byte[fis.available()];
+						fos.write(buf);
+						fis.close();
+						i++;
+					}
+					fos.close();
+				}
 			}
 		}
 	}
