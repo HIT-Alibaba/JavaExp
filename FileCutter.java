@@ -50,8 +50,6 @@ class CutPanel extends JPanel {
 			   tarLabel = new JLabel("保存目录:");
 		progressbar.setOrientation(JProgressBar.HORIZONTAL);
 		progressbar.setMinimum(0);
-		progressbar.setMaximum(1);
-		progressbar.setValue(0);
 		progressbar.setStringPainted(true);
 
 		ButtonGroup buttonGroup = new ButtonGroup();
@@ -99,19 +97,8 @@ class CutPanel extends JPanel {
 		tarPath.setBounds(210, 330, 100, 20);
 		btTar.setBounds(320, 330, 100, 20);
 		progressbar.setBounds(210, 400, 300, 20);
-
-		/*filename.addActionListener(eventListener);
-		filesize.addActionListener(eventListener);*/
 		btCut.addActionListener(eventListener);
 		btCho.addActionListener(eventListener);
-		/*blocksize.addActionListener(eventListener);
-		/*rbtn1.addActionListener(eventListener);
-		rbtn2.addActionListener(eventListener);
-		rbtn3.addActionListener(eventListener);
-		rbtn4.addActionListener(eventListener);
-		rbtnS.addActionListener(eventListener);*/
-		/*blocknum.addActionListener(eventListener);
-		tarPath.addActionListener(eventListener);*/
 		btTar.addActionListener(eventListener);
 	}
 	JTextField filename = new JTextField(),
@@ -134,7 +121,7 @@ class CutPanel extends JPanel {
 
 	JProgressBar progressbar = new JProgressBar();
 
-	int realSize, currentSize;
+	int realSize, currentSize = 0;
 	
 	private class Listener implements ActionListener {
 		private File targetpath = null, sourcefile = null;
@@ -178,16 +165,18 @@ class CutPanel extends JPanel {
 			}
 			if (e.getSource() == btCut) {
 				if (targetpath != null && sourcefile != null) {
-					/*Runnable bar = new ProgressBar();
-					Thread t = new Thread(bar);
-					t.start();*/
 					if (blockBytes >= sourcefile.length())
 			        	return;
 					try {
 						FileInputStream fis = new FileInputStream(sourcefile.getPath());  
 						byte[] b = new byte[(int)blockBytes];
 						realSize = fis.available();
+progressbar.setMaximum(realSize);
+progressbar.setValue(50);
 						int i = 0;
+						Runnable bar = new ProgressBar();
+						Thread t = new Thread(bar);
+						t.start();
 						while (fis.available() > 0) {
 							currentSize = realSize - fis.available();
 							i++;
@@ -203,11 +192,11 @@ class CutPanel extends JPanel {
 		}
 	}
 
-	/*private class ProgressBar implements Runnable {
+	private class ProgressBar implements Runnable {
 		public void run() {
-			progressbar.setValue(currentSize / realSize);
+			progressbar.setValue(currentSize);
 		}
-	}*/
+	}
 }
 
 class MergePanel extends JPanel {
@@ -247,14 +236,9 @@ class MergePanel extends JPanel {
 		btClear.setBounds(430, 330, 100, 20);
 		area.setBounds(210, 120, 300, 200);
 		progressbar.setBounds(210, 400, 300, 20);
-		btTar.setBounds(420, 360, 50, 20);
-	
-		/*filenum.addActionListener(eventListener);
-		tarfile.addActionListener(eventListener);*/
+		btTar.setBounds(420, 360, 50, 20);	
 		btMerge.addActionListener(eventListener);
 		btCho.addActionListener(eventListener);
-		/*btRemove.addActionListener(eventListener);
-		btClear.addActionListener(eventListener);*/
 		btTar.addActionListener(eventListener);
 	}
 
