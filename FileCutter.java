@@ -39,30 +39,10 @@ class Frame extends JFrame {
 }
 
 class CutPanel extends JPanel {
-	JTextField filename = new JTextField(),
-			   filesize = new JTextField(),
-			   blocksize = new JTextField(),
-			   blocknum = new JTextField(),
-			   tarPath = new JTextField();
-
-	JFileChooser fileChooser = new JFileChooser();
-
-	JButton btCut = new JButton("开始切割"),
-			btCho = new JButton("源文件"),
-			btTar = new JButton("目标文件");
-
-	JRadioButton rbtn1 = new JRadioButton("1.44MB",true),  
-		 		 rbtn2 = new JRadioButton("1.20MB"),
-		 		 rbtn3 = new JRadioButton("720KB"),
-		 		 rbtn4 = new JRadioButton("360KB"),
-		 		 rbtnS = new JRadioButton("自定义块的大小(单位：KB):");
-
-	JProgressBar progressbar = new JProgressBar();
-
-	int realSize, currentSize;
-
 	public CutPanel() throws IOException{
 		setLayout(null);
+		Listener eventListener = new Listener();
+
 		JLabel nameLabel = new JLabel("文件名:"),
 			   sizeLabel = new JLabel("文件大小(byte):"),
 			   blockLabel = new JLabel("块大小:"),
@@ -99,6 +79,7 @@ class CutPanel extends JPanel {
 		add(blocknum);
 		add(tarPath);
 		add(progressbar);
+
 		filename.setBounds(200, 50, 250, 20);
 		filesize.setBounds(200, 90, 250, 20);
 		btCut.setBounds(100, 400, 100, 20);
@@ -119,8 +100,41 @@ class CutPanel extends JPanel {
 		btTar.setBounds(320, 330, 100, 20);
 		progressbar.setBounds(210, 400, 300, 20);
 
-		//this.addActionListener(new Listener());
+		/*filename.addActionListener(eventListener);
+		filesize.addActionListener(eventListener);*/
+		btCut.addActionListener(eventListener);
+		btCho.addActionListener(eventListener);
+		/*blocksize.addActionListener(eventListener);
+		/*rbtn1.addActionListener(eventListener);
+		rbtn2.addActionListener(eventListener);
+		rbtn3.addActionListener(eventListener);
+		rbtn4.addActionListener(eventListener);
+		rbtnS.addActionListener(eventListener);*/
+		/*blocknum.addActionListener(eventListener);
+		tarPath.addActionListener(eventListener);*/
+		btTar.addActionListener(eventListener);
 	}
+	JTextField filename = new JTextField(),
+			   filesize = new JTextField(),
+			   blocksize = new JTextField(),
+			   blocknum = new JTextField(),
+			   tarPath = new JTextField();
+
+	JFileChooser fileChooser = new JFileChooser();
+
+	JButton btCut = new JButton("开始切割"),
+			btCho = new JButton("源文件"),
+			btTar = new JButton("目标文件");
+
+	JRadioButton rbtn1 = new JRadioButton("1.44MB",true),  
+		 		 rbtn2 = new JRadioButton("1.20MB"),
+		 		 rbtn3 = new JRadioButton("720KB"),
+		 		 rbtn4 = new JRadioButton("360KB"),
+		 		 rbtnS = new JRadioButton("自定义块的大小(单位：KB):");
+
+	JProgressBar progressbar = new JProgressBar();
+
+	int realSize, currentSize;
 	
 	private class Listener implements ActionListener {
 		private File targetpath = null, sourcefile = null;
@@ -154,14 +168,19 @@ class CutPanel extends JPanel {
 				if (result == JFileChooser.APPROVE_OPTION) {
 					targetpath = fileChooser.getSelectedFile();
 					tarPath.setText(targetpath.getPath());
+					if (sourcefile.length() % blockBytes != 0){
+						blocknum.setText(Long.toString(sourcefile.length() / (long)blockBytes + 1));
+					} else {
+						blocknum.setText(Long.toString(sourcefile.length() / (long)blockBytes));
+					}
 				}
 				return;
 			}
 			if (e.getSource() == btCut) {
 				if (targetpath != null && sourcefile != null) {
-					Runnable bar = new ProgressBar();
+					/*Runnable bar = new ProgressBar();
 					Thread t = new Thread(bar);
-					t.start();
+					t.start();*/
 					if (blockBytes >= sourcefile.length())
 			        	return;
 					try {
@@ -184,33 +203,18 @@ class CutPanel extends JPanel {
 		}
 	}
 
-	private class ProgressBar implements Runnable {
+	/*private class ProgressBar implements Runnable {
 		public void run() {
 			progressbar.setValue(currentSize / realSize);
 		}
-	}
+	}*/
 }
 
-class MergePanel extends JPanel /*implements ActionListener*/ {
-	JTextField filenum = new JTextField(),
-			   tarfile = new JTextField();
-
-	JButton btMerge = new JButton("开始合并"),
-			btCho = new JButton("选择文件"),
-			btRemove = new JButton("移除"),
-			btClear = new JButton("清空"),
-			btTar = new JButton("目标文件");
-
-	JTextArea area = new JTextArea(300, 200);
-
-	JProgressBar progressbar = new JProgressBar();
-
-	JFileChooser fileChooser = new JFileChooser();
-
-	int realSize, currentSize;
-
+class MergePanel extends JPanel {
 	public MergePanel() throws IOException{
 		setLayout(null);
+		Listener eventListener = new Listener();
+
 		JLabel numLabel = new JLabel("文件数量"),
 			   collectLabel = new JLabel("要合并的文件:"),
 			   tarLabel = new JLabel("目标文件:");
@@ -244,7 +248,32 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 		area.setBounds(210, 120, 300, 200);
 		progressbar.setBounds(210, 400, 300, 20);
 		btTar.setBounds(420, 360, 50, 20);
+	
+		/*filenum.addActionListener(eventListener);
+		tarfile.addActionListener(eventListener);*/
+		btMerge.addActionListener(eventListener);
+		btCho.addActionListener(eventListener);
+		/*btRemove.addActionListener(eventListener);
+		btClear.addActionListener(eventListener);*/
+		btTar.addActionListener(eventListener);
 	}
+
+	JTextField filenum = new JTextField(),
+			   tarfile = new JTextField();
+
+	JButton btMerge = new JButton("开始合并"),
+			btCho = new JButton("选择文件"),
+			btRemove = new JButton("移除"),
+			btClear = new JButton("清空"),
+			btTar = new JButton("目标文件");
+
+	JTextArea area = new JTextArea(300, 200);
+
+	JProgressBar progressbar = new JProgressBar();
+
+	JFileChooser fileChooser = new JFileChooser();
+
+	int realSize, currentSize;
 
 	private class Listener implements ActionListener {
 		private File targetfile = null;
@@ -281,9 +310,9 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 			}
 			if (e.getSource() == btMerge) {
 				if (targetfile != null && sourcefiles != null) {
-					Runnable bar = new ProgressBar();
+					/*Runnable bar = new ProgressBar();
 					Thread t = new Thread(bar);
-					t.start();
+					t.start();*/
 					try {
 						FileOutputStream fos = new FileOutputStream(targetfile.getPath());
 						int i = 0;
@@ -302,9 +331,9 @@ class MergePanel extends JPanel /*implements ActionListener*/ {
 		}
 	}
 
-	private class ProgressBar implements Runnable {
+	/*private class ProgressBar implements Runnable {
 		public void run() {
 			progressbar.setValue(currentSize / realSize);
 		}
-	}
+	}*/
 }
