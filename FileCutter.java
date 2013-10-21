@@ -171,8 +171,7 @@ class CutPanel extends JPanel {
 						FileInputStream fis = new FileInputStream(sourcefile.getPath());  
 						byte[] b = new byte[(int)blockBytes];
 						realSize = fis.available();
-progressbar.setMaximum(realSize);
-progressbar.setValue(50);
+						progressbar.setMaximum(realSize);
 						int i = 0;
 						Runnable bar = new ProgressBar();
 						Thread t = new Thread(bar);
@@ -188,13 +187,15 @@ progressbar.setValue(50);
 						fis.close();
 					} catch (IOException err) {}
 				}
-			}	
+			}
 		}
 	}
 
 	private class ProgressBar implements Runnable {
 		public void run() {
-			progressbar.setValue(currentSize);
+			while (currentSize <= realSize) {
+				progressbar.setValue(currentSize);
+			} 
 		}
 	}
 }
@@ -209,8 +210,6 @@ class MergePanel extends JPanel {
 			   tarLabel = new JLabel("目标文件:");
 		progressbar.setOrientation(JProgressBar.HORIZONTAL);
 		progressbar.setMinimum(0);
-		progressbar.setMaximum(1);
-		progressbar.setValue(0);
 		progressbar.setStringPainted(true);
 
 		add(numLabel);
@@ -294,12 +293,14 @@ class MergePanel extends JPanel {
 			}
 			if (e.getSource() == btMerge) {
 				if (targetfile != null && sourcefiles != null) {
-					/*Runnable bar = new ProgressBar();
-					Thread t = new Thread(bar);
-					t.start();*/
 					try {
 						FileOutputStream fos = new FileOutputStream(targetfile.getPath());
 						int i = 0;
+						progressbar.setMaximum(realSize);
+						progressbar.setValue(0);
+						Runnable bar = new ProgressBar();
+						Thread t = new Thread(bar);
+						t.start();
 						while (i < sourcefiles.size()) {
 							FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
 							currentSize = realSize - fis.available();
@@ -315,9 +316,11 @@ class MergePanel extends JPanel {
 		}
 	}
 
-	/*private class ProgressBar implements Runnable {
+	private class ProgressBar implements Runnable {
 		public void run() {
-			progressbar.setValue(currentSize / realSize);
+			while (currentSize <= realSize) {
+				progressbar.setValue(currentSize);
+			}
 		}
-	}*/
+	}
 }
