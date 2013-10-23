@@ -122,10 +122,11 @@ class CutPanel extends JPanel {
 	JProgressBar progressbar = new JProgressBar();
 
 	int realSize, currentSize = 0;
+
+	private File targetpath = null, sourcefile = null;
+	private double blockBytes = 0.0;
 	
 	private class Listener implements ActionListener {
-		private File targetpath = null, sourcefile = null;
-		private double blockBytes = 0.0;
 		public void actionPerformed(ActionEvent e) {
 			if (rbtn1.isSelected())
 				blockBytes = 1.44 * 1024 * 1024;
@@ -164,38 +165,36 @@ class CutPanel extends JPanel {
 				return;
 			}
 			if (e.getSource() == btCut) {
-				if (targetpath != null && sourcefile != null) {
-					if (blockBytes >= sourcefile.length())
-			        	return;
-					try {
-						FileInputStream fis = new FileInputStream(sourcefile.getPath());  
-						byte[] b = new byte[(int)blockBytes];
-						realSize = fis.available();
-						progressbar.setMaximum(realSize);
-						int i = 0;
-						Runnable bar = new ProgressBar();
-						Thread t = new Thread(bar);
-						t.start();
-						while (fis.available() > 0) {
-							currentSize = realSize - fis.available();
-							i++;
-							fis.read(b);
-							FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
-							fos.write(b);
-							fos.close();
-						} 
-						fis.close();
-					} catch (IOException err) {}
-				}
+				Runnable bar = new ProgressBar();
+				Thread t = new Thread(bar);
+				t.start();
 			}
 		}
 	}
 
 	private class ProgressBar implements Runnable {
 		public void run() {
-			while (currentSize <= realSize) {
-				progressbar.setValue(currentSize);
-			} 
+			if (targetpath != null && sourcefile != null) {
+				if (blockBytes >= sourcefile.length())
+			       	return;
+				try {
+					FileInputStream fis = new FileInputStream(sourcefile.getPath());  
+					byte[] b = new byte[(int)blockBytes];
+					realSize = fis.available();
+					progressbar.setMaximum(realSize);
+					int i = 0;
+					while (fis.available() > 0) {
+						currentSize = realSize - fis.available();
+						progressbar.setValue(currentSize);
+						i++;
+						fis.read(b);
+						FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
+						fos.write(b);
+						fos.close();
+					} 
+					fis.close();
+				} catch (IOException err) {}
+			}
 		}
 	}
 }
@@ -258,9 +257,11 @@ class MergePanel extends JPanel {
 
 	int realSize, currentSize;
 
+	private File targetfile = null;
+	private ArrayList<File> sourcefiles = new ArrayList<File>();
+
 	private class Listener implements ActionListener {
-		private File targetfile = null;
-		private ArrayList<File> sourcefiles = new ArrayList<File>();
+		
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btCho) {
 				fileChooser.setCurrentDirectory(new File("."));
@@ -292,34 +293,32 @@ class MergePanel extends JPanel {
 				sourcefiles = null;
 			}
 			if (e.getSource() == btMerge) {
-				if (targetfile != null && sourcefiles != null) {
-					try {
-						FileOutputStream fos = new FileOutputStream(targetfile.getPath());
-						int i = 0;
-						progressbar.setMaximum(realSize);
-						progressbar.setValue(0);
-						Runnable bar = new ProgressBar();
-						Thread t = new Thread(bar);
-						t.start();
-						while (i < sourcefiles.size()) {
-							FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
-							currentSize = realSize - fis.available();
-							byte[] buf = new byte[fis.available()];
-							fos.write(buf);
-							fis.close();
-							i++;
-						}
-						fos.close();
-					} catch (IOException err) {}
-				}
+				Runnable bar = new ProgressBar();
+				Thread t = new Thread(bar);
+				t.start();
 			}
 		}
 	}
 
 	private class ProgressBar implements Runnable {
 		public void run() {
-			while (currentSize <= realSize) {
-				progressbar.setValue(currentSize);
+			if (targetfile != null && sourcefiles != null) {
+				try {
+					FileOutputStream fos = new FileOutputStream(targetfile.getPath());
+					int i = 0;
+					progressbar.setMaximum(realSize);
+					progressbar.setValue(0);
+					while (i < sourcefiles.size()) {
+						FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
+						currentSize = realSize - fis.available();
+						progressbar.setValue(currentSize);
+						byte[] buf = new byte[fis.available()];
+						fos.write(buf);
+						fis.close();
+						i++;
+					}
+					fos.close();
+				} catch (IOException err) {}
 			}
 		}
 	}
