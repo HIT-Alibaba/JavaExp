@@ -25,7 +25,65 @@ class Frame extends JFrame {
 		setSize(frameW, frameH);
 		setLocationRelativeTo(null);
 		setTitle("chat～");
+		JDialog config = new JDialog(this, "设置", true);
+		config.add(new configPanel());
+		add(config);
+		Panel panel = new Panel();
+		add(panel);
+	}
+}
 
-		add();
+class Panel extends JPanel implements ActionListener {
+	public Panel() {
+		setLayout(null);
+
+	}
+	private JTextField
+	private void actionPerformed(ActionEvent e) {
+
+	}
+}
+
+class configPanel extends JPanel implements ActionListener {
+	public configPanel() {
+		setLayout(null);
+		JLabel addressLb = new JLabel("通信地址"),
+			   targetTextPortLb = new JLabel("目标消息接收端口"),
+			   localTextPortLb = new JLabel("本地消息接收端口"),
+			   targetFilePortLb = new JLabel("目标文件接收端口"),
+			   localFilePortLb = new JLabel("本地文件接收端口");
+		add(addressLb);
+		add(targetTextPortLb);
+		add(localTextPortLb);
+		add(targetFilePortLb);
+		add(localFilePortLb);
+		add(btOk);
+		add(address);
+		add(targetTextPort);
+		add(localTextPort);
+		add(targetFilePort);
+		add(localFilePort);
+		btOk.setBounds();
+		addressLb.setBounds();
+		targetTextPortLb.setBounds();
+		localTextPortLb.setBounds();
+		targetFilePortLb.setBounds();
+		localFilePortLb.setBounds();
+		address.setBounds();
+		targetTextPort.setBounds();
+		localTextPort.setBounds();
+		targetFilePort.setBounds();
+		localFilePort.setBounds();
+	}
+	public JTextField address = new JTextField();
+						targetTextPort = new JTextField();
+						localTextPort = new JTextField();
+						targetFilePort = new JTextField();
+						localFilePort = new JTextField();
+	private JButton btOk = new JButton("返回");
+	private void actionPerformed(ActionEvent e) {
+		if (e.getSource() == btOk) {
+
+		}
 	}
 }
