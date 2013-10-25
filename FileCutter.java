@@ -184,13 +184,13 @@ class CutPanel extends JPanel {
 					progressbar.setMaximum(realSize);
 					int i = 0;
 					while (fis.available() > 0) {
-						currentSize = realSize - fis.available();
-						progressbar.setValue(currentSize);
 						i++;
 						fis.read(b);
 						FileOutputStream fos = new FileOutputStream(targetpath.getPath() + "/part" + i);
 						fos.write(b);
 						fos.close();
+						currentSize = realSize - fis.available();
+						progressbar.setValue(currentSize);
 					} 
 					fis.close();
 				} catch (IOException err) {}
@@ -209,6 +209,7 @@ class MergePanel extends JPanel {
 			   tarLabel = new JLabel("目标文件:");
 		progressbar.setOrientation(JProgressBar.HORIZONTAL);
 		progressbar.setMinimum(0);
+		progressbar.setValue(0);
 		progressbar.setStringPainted(true);
 
 		add(numLabel);
@@ -307,14 +308,13 @@ class MergePanel extends JPanel {
 					FileOutputStream fos = new FileOutputStream(targetfile.getPath());
 					int i = 0;
 					progressbar.setMaximum(realSize);
-					progressbar.setValue(0);
 					while (i < sourcefiles.size()) {
 						FileInputStream fis = new FileInputStream(sourcefiles.get(i).getPath());
-						currentSize = realSize - fis.available();
-						progressbar.setValue(currentSize);
 						byte[] buf = new byte[fis.available()];
-						fos.write(buf);
+						currentSize += fis.available();
+						progressbar.setValue(currentSize);
 						fis.close();
+						fos.write(buf);
 						i++;
 					}
 					fos.close();
