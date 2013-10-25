@@ -7,31 +7,13 @@ import com.mongodb.*;
 
 public class MyDB {
 	public static void main (String[] args) {
-		LogFrame logframe = new LogFrame();
-		logframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		logframe.setVisible(true);
+		Frame frame = new Frame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
 	}
 }
 
-class LogFrame extends JFrame {
-	public LogFrame() throws IOException{
-		Toolkit kit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = kit.getScreenSize();
-		int screenW = screenSize.width;
-		int screenH = screenSize.height;
-		int frameW = 325;
-		int frameH = 300;
-		int x = screenW / 4;
-		int y = screenH / 4;
-		setSize(frameW, frameH);
-		setLocationRelativeTo(null);
-		setTitle("登录");
-		LogPanel logpanel = new LogPanel();
-		add(logpanel);
-	}
-}
-
-class LogPanel extends JPanel {
+class LogPanel extends JPanel implements ActionListener {
 	public LogPanel() {
 		JLabel userLb = new JLabel("用户名"),
 			   pwdLb = new JLabel("密码");
@@ -48,8 +30,8 @@ class LogPanel extends JPanel {
 		pwd.setBounds();
 		userLb.setBounds();
 		pwdLb.setBounds();
-		login.addActionListener(new Listener());
-		quit.addActionListener(new Listener());
+		login.addActionListener(this);
+		quit.addActionListener(this);
 	}
 
 	private JButton login = new JButton("登录");
@@ -59,27 +41,27 @@ class LogPanel extends JPanel {
 	private MongoClient mongoClient = new MongoClient("localhost", 27017);
 	private	DB db = mongoClient.getDB("students");
 
-	private class Listener implements ActionListener {
-		public actionPerformed (ActionEvent e) {
+		public void actionPerformed (ActionEvent e) {
 			if (e.getSource() == login) {
 				BasicDBObject query = new BasicDBObject("username", user.getText()).
 					append("password", pwd.getText());
 				DBCursor cursor = db.getCollection("admin").findOne(query);
 				try {
 				   if (cursor.hasNext()) {
-
+				   		dispose();
 				   } else {
-
+				   		user.setText("");
+				   		pwd.setText("");
 				   }
+				   
 				} finally {
 				   cursor.close();
 				}
 			}
 			if (e.getSource() == quit) {
-
+				System.exit(0);
 			}
 		}
-	}
 }
 
 class Frame extends JFrame {
@@ -95,61 +77,49 @@ class Frame extends JFrame {
 		setSize(frameW, frameH);
 		setLocationRelativeTo(null);
 		setTitle("学生信息数据库");
-		Panel panel = new Panel();
+		JDialog logdlg = JDialog(this, "登录", true);
+		logdlg.add(new LogPanel());
+		add(logdlg);
+		Panel panel = new Panel(this);
 		add(panel);
 	}
 }
 
-class Panel extends JPanel {
-	public Panel() {
+class Panel extends JPanel implements ActionListener {
+	public Panel(Frame parent) {
+		par = parent;
 		setLayout(null);
 		add(btInsert);
 		btInsert.setBounds(200, 50, 250, 20);
-		btInsert.addActionListener(new Listener());
+		btInsert.addActionListener(this);
 
 		DBCursor cursor = db.getCollection("student").find();
 		try {
 		   while(cursor.hasNext()) {
-		       //cursor.next();
+		       data.append(cursor.next());
+		       data.append("\n");
 		   }
 		} finally {
 		   cursor.close();
 		}
 	}
 
+	private Frame par = null;
 	private JButton btInsert = new JButton("学生添加");
+	private JTextArea dataList = new JTextArea(400, 300);
 	private MongoClient mongoClient = new MongoClient("localhost", 27017);
 	private	DB db = mongoClient.getDB("students");
 
-	private class Listener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btInsert) {
-				
+				JDialog insertdlg = new JDialog(par, "插", true);
+				insertdlg.add(new InsertPanel());
 			}
 		}
-	}
 
 }
 
-class InsertFrame extends JFrame {
-	public InsertFrame() {
-		Toolkit kit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = kit.getScreenSize();
-		int screenW = screenSize.width;
-		int screenH = screenSize.height;
-		int frameW = 400;
-		int frameH = 500;
-		int x = screenW / 4;
-		int y = screenH / 4;
-		setSize(frameW, frameH);
-		setLocationRelativeTo(null);
-		setTitle("插");
-		InsertPanel insertPanel = new InsertPanel();
-		add(insertPanel);
-	}
-}
-
-class InsertPanel extends JPanel {
+class InsertPanel extends JPanel implements ActionListener {
 	public InsertPanel() {
 		setLayout(null);
 		JLabel nameLb = new JLabel("姓名"),
@@ -197,8 +167,8 @@ class InsertPanel extends JPanel {
 		birthLb.setBounds();
 		collegeLb.setBounds();
 
-		btOk.addActionListener(new Listener());
-		btCancle.addActionListener(new Listener());
+		btOk.addActionListener(this);
+		btCancle.addActionListener(this);
 	}
 	private JButton btOk = new JButton("确认");
 	private JButton btCancle = new JButton("取消");
@@ -214,8 +184,8 @@ class InsertPanel extends JPanel {
 	private MongoClient mongoClient = new MongoClient("localhost", 27017);
 	private	DB db = mongoClient.getDB("students");
 
-	private class Listener implements ActionListener {
-		public actionPerformed(ActionEvent e) {
+	//private class Listener  {
+		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btOk) {
 				String sex;
 				if (man.isSelected()) {
@@ -233,10 +203,11 @@ class InsertPanel extends JPanel {
                     append("college", college.getText());
 
 				coll.insert(doc);
+				dispose();
 			}
 			if (e.getSource() == btCancle) {
-
+				dispose();
 			}
 		}
-	}
+	
 }
