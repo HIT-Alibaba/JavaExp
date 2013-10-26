@@ -3,15 +3,83 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import com.mongodb.*;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.ServerAddress;
 
 public class MyDB {
-	public static void main (String[] args) {
+	public static void main (String[] args) throws IOException {
 		Frame frame = new Frame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
 }
+
+class Frame extends JFrame {
+	public Frame() throws IOException{
+		pframe = this;
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Dimension screenSize = kit.getScreenSize();
+		int screenW = screenSize.width;
+		int screenH = screenSize.height;
+		int frameW = 650;
+		int frameH = 600;
+		int x = screenW / 4;
+		int y = screenH / 4;
+		setSize(frameW, frameH);
+		setLocationRelativeTo(null);
+		setTitle("学生信息数据库");
+		JDialog logdlg = new JDialog(this, "登录", true);
+		logdlg.add(new LogPanel());
+		Panel panel = new Panel();
+		add(panel);
+	}
+	Frame pframe = null;
+  class Panel extends JPanel implements ActionListener {
+	public Panel() {
+		setLayout(null);
+		add(btInsert);
+		btInsert.setBounds(200, 50, 250, 20);
+		btInsert.addActionListener(this);
+
+		DBCursor cursor = db.getCollection("student").find();
+		try {
+		   while(cursor.hasNext()) {
+		   	   DBObject current = cursor.next();
+		       dataList.append(current.get("id") + " ");
+		       dataList.append(current.get("name") + " ");
+		       dataList.append(current.get("sex") + " ");
+		       dataList.append(current.get("age") + " ");
+		       dataList.append(current.get("birthday") + " ");
+		       dataList.append(current.get("college") + " ");
+		       dataList.append("\n");
+		   }
+		} finally {
+		   cursor.close();
+		}
+	}
+	private JButton btInsert = new JButton("学生添加");
+	private JTextArea dataList = new JTextArea(400, 300);
+	private MongoClient mongoClient = new MongoClient("localhost", 27017);
+	private	DB db = mongoClient.getDB("students");
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == btInsert) {
+				JDialog insertdlg = new JDialog(pframe, "插", true);
+				insertdlg.add(new InsertPanel());
+			}
+		}
+
+  }
+}
+
+
 
 class LogPanel extends JPanel implements ActionListener {
 	public LogPanel() {
@@ -45,10 +113,10 @@ class LogPanel extends JPanel implements ActionListener {
 			if (e.getSource() == login) {
 				BasicDBObject query = new BasicDBObject("username", user.getText()).
 					append("password", pwd.getText());
-				DBCursor cursor = db.getCollection("admin").findOne(query);
+				DBCursor cursor = db.getCollection("admin").find(query);
 				try {
 				   if (cursor.hasNext()) {
-				   		dispose();
+				   		setVisible(false);
 				   } else {
 				   		user.setText("");
 				   		pwd.setText("");
@@ -62,61 +130,6 @@ class LogPanel extends JPanel implements ActionListener {
 				System.exit(0);
 			}
 		}
-}
-
-class Frame extends JFrame {
-	public Frame() throws IOException{
-		Toolkit kit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = kit.getScreenSize();
-		int screenW = screenSize.width;
-		int screenH = screenSize.height;
-		int frameW = 650;
-		int frameH = 600;
-		int x = screenW / 4;
-		int y = screenH / 4;
-		setSize(frameW, frameH);
-		setLocationRelativeTo(null);
-		setTitle("学生信息数据库");
-		JDialog logdlg = JDialog(this, "登录", true);
-		logdlg.add(new LogPanel());
-		add(logdlg);
-		Panel panel = new Panel(this);
-		add(panel);
-	}
-}
-
-class Panel extends JPanel implements ActionListener {
-	public Panel(Frame parent) {
-		par = parent;
-		setLayout(null);
-		add(btInsert);
-		btInsert.setBounds(200, 50, 250, 20);
-		btInsert.addActionListener(this);
-
-		DBCursor cursor = db.getCollection("student").find();
-		try {
-		   while(cursor.hasNext()) {
-		       data.append(cursor.next());
-		       data.append("\n");
-		   }
-		} finally {
-		   cursor.close();
-		}
-	}
-
-	private Frame par = null;
-	private JButton btInsert = new JButton("学生添加");
-	private JTextArea dataList = new JTextArea(400, 300);
-	private MongoClient mongoClient = new MongoClient("localhost", 27017);
-	private	DB db = mongoClient.getDB("students");
-
-		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == btInsert) {
-				JDialog insertdlg = new JDialog(par, "插", true);
-				insertdlg.add(new InsertPanel());
-			}
-		}
-
 }
 
 class InsertPanel extends JPanel implements ActionListener {
@@ -183,8 +196,6 @@ class InsertPanel extends JPanel implements ActionListener {
 	private JRadioButton woman = new JRadioButton("f");
 	private MongoClient mongoClient = new MongoClient("localhost", 27017);
 	private	DB db = mongoClient.getDB("students");
-
-	//private class Listener  {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btOk) {
 				String sex;
@@ -203,11 +214,11 @@ class InsertPanel extends JPanel implements ActionListener {
                     append("college", college.getText());
 
 				coll.insert(doc);
-				dispose();
 			}
 			if (e.getSource() == btCancle) {
-				dispose();
+
 			}
+			setVisible(false);
 		}
 	
 }
