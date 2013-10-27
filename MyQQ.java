@@ -44,23 +44,26 @@ class Panel extends JPanel implements ActionListener {
 		add(sendMsg);
 		add(sendFile);
 		add(accept);
-		nameLb.setBounds();
-		name.setBounds();
-		say.setBounds();
-		log.setBounds();
-		config.setBounds();
-		sendMsg.setBounds();
-		sendFile.setBounds();
-		accept.setBounds();
+		nameLb.setBounds(10, 410, 50, 20);
+		name.setBounds(60, 410, 100, 20);
+		say.setBounds(10, 430, 490, 200);
+		log.setBounds(10, 10, 490, 400);
+		config.setBounds(10, 0, 20, 10);
+		sendMsg.setBounds(560, 630, 30, 20);
+		sendFile.setBounds(520, 630, 30, 20);
+		accept.setBounds(480, 630, 30, 20);
 		config.addActionListener(this);
 		sendMsg.addActionListener(this);
 		sendFile.addActionListener(this);
 		accept.addActionListener(this);
+		try {
+			ss = new ServerSocket(3000);
+		} catch (IOException err) {}
 		Runnable get = new ReviceMsg();
 		Thread t = new Thread(get);
 		t.start();
 	}
-	private ServerSocket ss = new ServerSocket(3000);
+	private ServerSocket ss = null;
 	private String address = "";
 	private int	targetTextPort,
 				localTextPort,
@@ -147,8 +150,8 @@ class Panel extends JPanel implements ActionListener {
 					sourcefile = fileChooser.getSelectedFile();
 					path = sourcefile.getPath();
 				}
-				Socket socket = new Socket(address, targetFilePort);
 				try {
+					Socket socket = new Socket(address, targetFilePort);
 				    FileInputStream fs = new FileInputStream(path);
 				    byte[] bytes = new byte[1024];
 				    BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
@@ -175,8 +178,8 @@ class Panel extends JPanel implements ActionListener {
 				targetfile = fileChooser.getSelectedFile();
 				path = targetfile.getPath();
 			}
-			Socket socket = ss.accept();
 	        try {
+	        	Socket socket = ss.accept();
 	        	BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
 	            byte[] bytes = new byte[1024];
 	            FileOutputStream fos = new FileOutputStream(path + "/recivedfile");
@@ -226,16 +229,16 @@ class ConfigDialog extends JDialog {
 		add(localTextPort);
 		add(targetFilePort);
 		add(localFilePort);
-		addressLb.setBounds();
-		targetTextPortLb.setBounds();
-		localTextPortLb.setBounds();
-		targetFilePortLb.setBounds();
-		localFilePortLb.setBounds();
-		address.setBounds();
-		targetTextPort.setBounds();
-		localTextPort.setBounds();
-		targetFilePort.setBounds();
-		localFilePort.setBounds();
+		addressLb.setBounds(10, 10, 30, 20);
+		targetTextPortLb.setBounds(10, 40, 30, 20);
+		localTextPortLb.setBounds(10, 70, 30, 20);
+		targetFilePortLb.setBounds(10, 100, 30, 20);
+		localFilePortLb.setBounds(10, 130, 30, 20);
+		address.setBounds(40, 10, 40, 20);
+		targetTextPort.setBounds(40, 40, 40, 20);
+		localTextPort.setBounds(40, 70, 40, 20);
+		targetFilePort.setBounds(40, 100, 40, 20);
+		localFilePort.setBounds(40, 130, 40, 20);
 		btOk.addActionListener(this);
 	}
 	public JTextField address = new JTextField(),

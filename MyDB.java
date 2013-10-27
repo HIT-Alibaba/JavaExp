@@ -45,9 +45,12 @@ class Frame extends JFrame {
 	public Panel() {
 		setLayout(null);
 		add(btInsert);
-		btInsert.setBounds(200, 50, 250, 20);
+		btInsert.setBounds(10, 10, 40, 30);
 		btInsert.addActionListener(this);
-
+		try {
+			mongoClient = new MongoClient("localhost", 27017);
+			db = mongoClient.getDB("students");
+		} catch (Exception err) {}
 		DBCursor cursor = db.getCollection("student").find();
 		try {
 		   while(cursor.hasNext()) {
@@ -66,8 +69,8 @@ class Frame extends JFrame {
 	}
 	private JButton btInsert = new JButton("学生添加");
 	private JTextArea dataList = new JTextArea(400, 300);
-	private MongoClient mongoClient = new MongoClient("localhost", 27017);
-	private	DB db = mongoClient.getDB("students");
+	private MongoClient mongoClient;
+	private	DB db;
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btInsert) {
@@ -92,22 +95,26 @@ class LogPanel extends JPanel implements ActionListener {
 		add(pwd);
 		add(userLb);
 		add(pwdLb);
-		login.setBounds(200, 50, 250, 20);
-		quit.setBounds();
-		user.setBounds();
-		pwd.setBounds();
-		userLb.setBounds();
-		pwdLb.setBounds();
+		login.setBounds(10, 100, 40, 30);
+		quit.setBounds(50, 100, 40, 30);
+		user.setBounds(60, 30, 40, 30);
+		pwd.setBounds(60, 70, 40, 30);
+		userLb.setBounds(10, 30, 40, 30);
+		pwdLb.setBounds(10, 70, 40, 30);
 		login.addActionListener(this);
 		quit.addActionListener(this);
+		try {
+			mongoClient = new MongoClient("localhost", 27017);
+			db = mongoClient.getDB("students");
+		} catch (Exception err) {}
 	}
 
 	private JButton login = new JButton("登录");
 	private JButton quit = new JButton("退出");
 	private JTextField user = new JTextField();
 	private JTextField pwd = new JTextField();
-	private MongoClient mongoClient = new MongoClient("localhost", 27017);
-	private	DB db = mongoClient.getDB("students");
+	private MongoClient mongoClient;
+	private	DB db;
 
 		public void actionPerformed (ActionEvent e) {
 			if (e.getSource() == login) {
@@ -162,26 +169,29 @@ class InsertPanel extends JPanel implements ActionListener {
 		add(birthLb);
 		add(collegeLb);
 
-		btOk.setBounds();
-		btCancle.setBounds();
-		id.setBounds();
-		name.setBounds();
-		age.setBounds();
-		year.setBounds();
-		month.setBounds();
-		day.setBounds();
-		man.setBounds();
-		woman.setBounds();
-		college.setBounds();
-		nameLb.setBounds();
-		idLb.setBounds();
-		sexLb.setBounds();
-		ageLb.setBounds();
-		birthLb.setBounds();
-		collegeLb.setBounds();
-
+		btOk.setBounds(10, 220, 40, 30);
+		btCancle.setBounds(60, 220, 40, 30);
+		id.setBounds(60, 60, 40, 30);
+		name.setBounds(60, 10, 40, 30);
+		age.setBounds(60, 120, 40, 30);
+		year.setBounds(60, 150, 40, 30);
+		month.setBounds(100, 150, 40, 30);
+		day.setBounds(140, 150, 40, 30);
+		man.setBounds(60, 90, 40, 30);
+		woman.setBounds(100, 90, 40, 30);
+		college.setBounds(60, 180, 40, 30);
+		nameLb.setBounds(10, 10, 40, 30);
+		idLb.setBounds(10, 60, 40, 30);
+		sexLb.setBounds(10, 90, 40, 30);
+		ageLb.setBounds(10, 120, 40, 30);
+		birthLb.setBounds(10, 150, 40, 30);
+		collegeLb.setBounds(10, 180, 40, 30);
 		btOk.addActionListener(this);
 		btCancle.addActionListener(this);
+		try {
+			mongoClient = new MongoClient("localhost", 27017);
+			db = mongoClient.getDB("students");
+		} catch (Exception err) {}
 	}
 	private JButton btOk = new JButton("确认");
 	private JButton btCancle = new JButton("取消");
@@ -194,8 +204,8 @@ class InsertPanel extends JPanel implements ActionListener {
 	private JTextField college = new JTextField();
 	private JRadioButton man = new JRadioButton("m", true);
 	private JRadioButton woman = new JRadioButton("f");
-	private MongoClient mongoClient = new MongoClient("localhost", 27017);
-	private	DB db = mongoClient.getDB("students");
+	private MongoClient mongoClient;
+	private	DB db;
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == btOk) {
 				String sex;
