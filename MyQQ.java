@@ -36,33 +36,44 @@ class Panel extends JPanel implements ActionListener {
 		setLayout(null);
 		pt = parent;
 		JLabel nameLb = new JLabel("昵称");
+		JScrollPane ssay = new JScrollPane(say);
+		JScrollPane slog = new JScrollPane(log);
 		add(nameLb);
 		add(name);
-		add(say);
-		add(log);
-		add(config);
+		add(ssay);
+		add(slog);
 		add(sendMsg);
 		add(sendFile);
 		add(accept);
 		nameLb.setBounds(10, 410, 50, 20);
 		name.setBounds(60, 410, 100, 20);
-		say.setBounds(10, 430, 490, 200);
-		log.setBounds(10, 10, 490, 400);
-		config.setBounds(10, 0, 20, 10);
-		sendMsg.setBounds(560, 630, 30, 20);
-		sendFile.setBounds(520, 630, 30, 20);
-		accept.setBounds(480, 630, 30, 20);
-		config.addActionListener(this);
+		ssay.setBounds(10, 430, 490, 200);
+		slog.setBounds(10, 10, 490, 400);
+		sendMsg.setBounds(610, 630, 60, 20);
+		sendFile.setBounds(550, 630, 60, 20);
+		accept.setBounds(480, 630, 60, 20);
+		try {
+			Scanner confile = new Scanner(new File("/home/soufii/JavaExp/config"));
+			address = confile.nextLine();
+			localTextPort = Integer.parseInt(confile.nextLine());
+			localFilePort = Integer.parseInt(confile.nextLine());
+			targetTextPort = Integer.parseInt(confile.nextLine());
+			targetFilePort = Integer.parseInt(confile.nextLine());
+		} catch (IOException er) {}
 		sendMsg.addActionListener(this);
 		sendFile.addActionListener(this);
 		accept.addActionListener(this);
 		try {
-			ss = new ServerSocket(3000);
+			ss = new ServerSocket(localFilePort);
 		} catch (IOException err) {}
+		try {
+			dataSocket = new DatagramSocket(localTextPort);;
+		} catch (IOException e) {}
 		Runnable get = new ReviceMsg();
 		Thread t = new Thread(get);
 		t.start();
 	}
+	private DatagramSocket dataSocket = null;
 	private ServerSocket ss = null;
 	private String address = "";
 	private int	targetTextPort,
@@ -72,20 +83,11 @@ class Panel extends JPanel implements ActionListener {
 	private JTextField name = new JTextField();
 	private JTextArea say = new JTextArea(500, 400);
 	private JTextArea log = new JTextArea(500, 100);
-	private JButton config = new JButton("系统设置"),
-					sendMsg = new JButton("发送消息"),
+	private JButton sendMsg = new JButton("发送消息"),
 					sendFile = new JButton("传送文件"),
 					accept = new JButton("接收文件");
 	public Frame pt;
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == config) {
-			ConfigDialog set = new ConfigDialog(pt);
-			address = set.addressD;
-			targetTextPort = Integer.parseInt(set.targetTextPortD);
-			localTextPort = Integer.parseInt(set.localTextPortD);
-			targetFilePort = Integer.parseInt(set.targetFilePortD);
-			localFilePort = Integer.parseInt(set.localFilePortD);
-		}
 		if (e.getSource() == sendMsg) {
 			String msg = name.getText() + "说:" + say.getText() + "\n";
 			log.append(msg);
@@ -106,13 +108,11 @@ class Panel extends JPanel implements ActionListener {
 	}
 
 	private class SendMsg implements Runnable {
-		private DatagramSocket dataSocket;
     	private DatagramPacket dataPacket;
     	public void run() {
 			try {
-	            dataSocket = new DatagramSocket(localTextPort);
 	            byte[] sendDataByte = new byte[1024];
-	            String sendStr = say.getText();
+	            String sendStr = name.getText() + "说:" + say.getText() + '\n';
 	            sendDataByte = sendStr.getBytes();
 	            dataPacket = new DatagramPacket(sendDataByte, 
 	            	sendDataByte.length, 
@@ -126,7 +126,6 @@ class Panel extends JPanel implements ActionListener {
 	private class ReviceMsg implements Runnable {
 		public void run() {
 			try {
-	            DatagramSocket dataSocket = new DatagramSocket(localTextPort);
 	            byte[] receiveByte = new byte[1024];
 	            DatagramPacket dataPacket = new DatagramPacket(receiveByte, receiveByte.length);
 	            String receiveStr;
@@ -162,7 +161,7 @@ class Panel extends JPanel implements ActionListener {
 			        bos.close();
 			        fs.close();
 			        socket.close();
-			        log.append("文件传送完毕！");
+			        log.append("文件传送完毕！\n");
 		    	} catch(Exception err) {}
 		}
 	}
@@ -173,6 +172,7 @@ class Panel extends JPanel implements ActionListener {
 		String path;
 		public void run() {
 			fileChooser.setCurrentDirectory(new File("."));
+			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int result = fileChooser.showSaveDialog(null);
 			if (result == JFileChooser.APPROVE_OPTION) {
 				targetfile = fileChooser.getSelectedFile();
@@ -192,70 +192,8 @@ class Panel extends JPanel implements ActionListener {
 	            fos.close();
 	            bis.close();
 	            socket.close();
-	            log.append("文件接收成功！");
+	            log.append("文件接收成功！\n");
 	        } catch(Exception err) {}
 	    }
 	}
-}
-
-class ConfigDialog extends JDialog {
-	public ConfigDialog(Frame parent) {
-		super(parent, "设置", true);
-		add(new ConfigPanel());
-		setVisible(true);
-	}
-	public String addressD,
-					targetTextPortD,
-					localTextPortD,
-					targetFilePortD,
-					localFilePortD;
-
- private class ConfigPanel extends JPanel implements ActionListener {
-	public void ConfigPanel() {
-		setLayout(null);
-		JLabel addressLb = new JLabel("通信地址"),
-			   targetTextPortLb = new JLabel("目标消息接收端口"),
-			   localTextPortLb = new JLabel("本地消息接收端口"),
-			   targetFilePortLb = new JLabel("目标文件接收端口"),
-			   localFilePortLb = new JLabel("本地文件接收端口");
-		add(addressLb);
-		add(targetTextPortLb);
-		add(localTextPortLb);
-		add(targetFilePortLb);
-		add(localFilePortLb);
-		add(btOk);
-		add(address);
-		add(targetTextPort);
-		add(localTextPort);
-		add(targetFilePort);
-		add(localFilePort);
-		addressLb.setBounds(10, 10, 30, 20);
-		targetTextPortLb.setBounds(10, 40, 30, 20);
-		localTextPortLb.setBounds(10, 70, 30, 20);
-		targetFilePortLb.setBounds(10, 100, 30, 20);
-		localFilePortLb.setBounds(10, 130, 30, 20);
-		address.setBounds(40, 10, 40, 20);
-		targetTextPort.setBounds(40, 40, 40, 20);
-		localTextPort.setBounds(40, 70, 40, 20);
-		targetFilePort.setBounds(40, 100, 40, 20);
-		localFilePort.setBounds(40, 130, 40, 20);
-		btOk.addActionListener(this);
-	}
-	public JTextField address = new JTextField(),
-						targetTextPort = new JTextField(),
-						localTextPort = new JTextField(),
-						targetFilePort = new JTextField(),
-						localFilePort = new JTextField();
-	private JButton btOk = new JButton("返回");
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btOk) {
-			addressD = address.getText();
-			targetTextPortD = targetTextPort.getText();
-			localTextPortD = localTextPort.getText();
-			targetFilePortD = targetFilePort.getText();
-			localFilePortD = localFilePort.getText();
-			setVisible(false);
-		}
-	}
- }
 }
