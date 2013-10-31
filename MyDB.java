@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
@@ -16,80 +15,20 @@ import com.mongodb.ServerAddress;
 
 public class MyDB {
 	public static void main (String[] args) throws IOException {
-		Frame frame = new Frame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
+		Logdialog logdlg = new Logdialog(null, "登录", true);
+		logdlg.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		logdlg.setVisible(true);
 	}
 }
 
-class Frame extends JFrame {
-	public Frame() throws IOException{
-		pframe = this;
-		Toolkit kit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = kit.getScreenSize();
-		int screenW = screenSize.width;
-		int screenH = screenSize.height;
-		int frameW = 650;
-		int frameH = 600;
-		int x = screenW / 4;
-		int y = screenH / 4;
-		setSize(frameW, frameH);
-		setLocationRelativeTo(null);
-		setTitle("学生信息数据库");
-		JDialog logdlg = new JDialog(this, "登录", true);
-		logdlg.add(new LogPanel());
-		Panel panel = new Panel();
-		add(panel);
-	}
-	Frame pframe = null;
-  class Panel extends JPanel implements ActionListener {
-	public Panel() {
+class Logdialog extends JDialog implements ActionListener {
+	public Logdialog (JFrame parent, String title, Boolean bool) {
+		super(parent, title, bool);
 		setLayout(null);
-		add(btInsert);
-		btInsert.setBounds(10, 10, 40, 30);
-		btInsert.addActionListener(this);
-		try {
-			mongoClient = new MongoClient("localhost", 27017);
-			db = mongoClient.getDB("students");
-		} catch (Exception err) {}
-		DBCursor cursor = db.getCollection("student").find();
-		try {
-		   while(cursor.hasNext()) {
-		   	   DBObject current = cursor.next();
-		       dataList.append(current.get("id") + " ");
-		       dataList.append(current.get("name") + " ");
-		       dataList.append(current.get("sex") + " ");
-		       dataList.append(current.get("age") + " ");
-		       dataList.append(current.get("birthday") + " ");
-		       dataList.append(current.get("college") + " ");
-		       dataList.append("\n");
-		   }
-		} finally {
-		   cursor.close();
-		}
-	}
-	private JButton btInsert = new JButton("学生添加");
-	private JTextArea dataList = new JTextArea(400, 300);
-	private MongoClient mongoClient;
-	private	DB db;
-
-		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == btInsert) {
-				JDialog insertdlg = new JDialog(pframe, "插", true);
-				insertdlg.add(new InsertPanel());
-			}
-		}
-
-  }
-}
-
-
-
-class LogPanel extends JPanel implements ActionListener {
-	public LogPanel() {
+		setSize(300, 200);
+		setLocationRelativeTo(null);
 		JLabel userLb = new JLabel("用户名"),
 			   pwdLb = new JLabel("密码");
-		setLayout(null);
 		add(login);
 		add(quit);
 		add(user);
@@ -97,15 +36,15 @@ class LogPanel extends JPanel implements ActionListener {
 		add(userLb);
 		add(pwdLb);
 		login.setBounds(10, 100, 40, 30);
-		quit.setBounds(50, 100, 40, 30);
-		user.setBounds(60, 30, 40, 30);
-		pwd.setBounds(60, 70, 40, 30);
-		userLb.setBounds(10, 30, 40, 30);
-		pwdLb.setBounds(10, 70, 40, 30);
+		quit.setBounds(60, 100, 40, 30);
+		user.setBounds(60, 10, 40, 30);
+		pwd.setBounds(60, 50, 40, 30);
+		userLb.setBounds(10, 10, 40, 30);
+		pwdLb.setBounds(10, 50, 40, 30);
 		login.addActionListener(this);
 		quit.addActionListener(this);
 		try {
-			mongoClient = new MongoClient("localhost", 27017);
+			mongoClient = new MongoClient();
 			db = mongoClient.getDB("students");
 		} catch (Exception err) {}
 	}
@@ -117,31 +56,123 @@ class LogPanel extends JPanel implements ActionListener {
 	private MongoClient mongoClient;
 	private	DB db;
 
-		public void actionPerformed (ActionEvent e) {
-			if (e.getSource() == login) {
-				BasicDBObject query = new BasicDBObject("username", user.getText()).
-					append("password", pwd.getText());
-				DBCursor cursor = db.getCollection("admin").find(query);
-				try {
-				   if (cursor.hasNext()) {
-				   		setVisible(false);
-				   } else {
-				   		user.setText("");
-				   		pwd.setText("");
-				   }
-				   
-				} finally {
-				   cursor.close();
-				}
+	public void actionPerformed (ActionEvent e) {
+		if (e.getSource() == login) {
+			BasicDBObject query = new BasicDBObject("username", user.getText()).
+				append("password", pwd.getText());
+			DBCursor cursor = db.getCollection("admin").find(query);
+			try {
+			   if (cursor.hasNext()) {
+			   		Frame mainFrame = new Frame();
+			   		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					mainFrame.setVisible(true);
+			   		this.setVisible(false);
+			   	} else {
+			   		user.setText("");
+			   		pwd.setText("");
+			   	}
+			} catch (IOException errr) {
+			cursor.close();
 			}
 			if (e.getSource() == quit) {
 				System.exit(0);
 			}
 		}
+	}
 }
 
-class InsertPanel extends JPanel implements ActionListener {
-	public InsertPanel() {
+
+class Frame extends JFrame implements ActionListener {
+	public Frame() throws IOException{
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Dimension screenSize = kit.getScreenSize();
+		int screenW = screenSize.width;
+		int screenH = screenSize.height;
+		int frameW = 650;
+		int frameH = 600;
+		int x = screenW / 4;
+		int y = screenH / 4;
+		setSize(frameW, frameH);
+		setLocationRelativeTo(null);
+		setTitle("学生信息数据库");
+		add(btInsert);
+		add(dataList);
+		add(refresh);
+		setLayout(null);
+		btInsert.setBounds(10, 10, 40, 30);
+		refresh.setBounds(60, 10, 40, 30);
+		dataList.setBounds(10, 100, 600, 300);
+		btInsert.addActionListener(this);
+		refresh.addActionListener(this);
+		dataList.append("学号\t姓名\t性别\t年龄\t生日\t学院\n");
+		try {
+			mongoClient = new MongoClient("localhost", 27017);
+			db = mongoClient.getDB("students");
+		} catch (Exception err) {}
+		DBCursor cursor = db.getCollection("student").find();
+		try {
+		   while(cursor.hasNext()) {
+		   	   DBObject current = cursor.next();
+		       dataList.append(current.get("id") + "\t");
+		       dataList.append(current.get("name") + "\t");
+		       dataList.append(current.get("sex") + "\t");
+		       dataList.append(current.get("age") + "\t");
+		       dataList.append(current.get("birthday") + "\t");
+		       dataList.append(current.get("college") + "");
+		       dataList.append("\n");
+		   }
+		} finally {
+		   cursor.close();
+		}
+	}
+	private JButton btInsert = new JButton("学生添加"),
+					refresh = new JButton("刷新列表");
+	private JTextArea dataList = new JTextArea(600, 300);
+	private MongoClient mongoClient;
+	private	DB db;
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == btInsert) {
+			try {
+				InsertFrame insertFrame = new InsertFrame();
+				insertFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+				insertFrame.setVisible(true);
+			} catch (IOException er) {}
+		}
+		if (e.getSource() == refresh) {
+			dataList.setText("学号\t姓名\t性别\t年龄\t生日\t学院\n");
+			DBCursor cursor = db.getCollection("student").find();
+			try {
+			   while(cursor.hasNext()) {
+			   	   DBObject current = cursor.next();
+			       dataList.append(current.get("id") + "\t");
+			       dataList.append(current.get("name") + "\t");
+			       dataList.append(current.get("sex") + "\t");
+			       dataList.append(current.get("age") + "\t");
+			       dataList.append(current.get("birthday") + "\t");
+			       dataList.append(current.get("college") + "");
+			       dataList.append("\n");
+			   }
+			} finally {
+			   cursor.close();
+			}
+		}
+	}
+}
+
+class InsertFrame extends JFrame implements ActionListener {
+	public InsertFrame() throws IOException{
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		Dimension screenSize = kit.getScreenSize();
+		int screenW = screenSize.width;
+		int screenH = screenSize.height;
+		int frameW = 650;
+		int frameH = 600;
+		int x = screenW / 4;
+		int y = screenH / 4;
+		setSize(frameW, frameH);
+		setLocationRelativeTo(null);
+		setTitle("插入数据");
 		setLayout(null);
 		JLabel nameLb = new JLabel("姓名"),
 			   idLb = new JLabel("学号"),
@@ -169,7 +200,6 @@ class InsertPanel extends JPanel implements ActionListener {
 		add(ageLb);
 		add(birthLb);
 		add(collegeLb);
-
 		btOk.setBounds(10, 220, 40, 30);
 		btCancle.setBounds(60, 220, 40, 30);
 		id.setBounds(60, 60, 40, 30);
@@ -203,33 +233,31 @@ class InsertPanel extends JPanel implements ActionListener {
 	private JTextField month = new JTextField();
 	private JTextField day = new JTextField();
 	private JTextField college = new JTextField();
-	private JRadioButton man = new JRadioButton("m", true);
-	private JRadioButton woman = new JRadioButton("f");
+	private JRadioButton man = new JRadioButton("男", true);
+	private JRadioButton woman = new JRadioButton("女");
 	private MongoClient mongoClient;
 	private	DB db;
-		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == btOk) {
-				String sex;
-				if (man.isSelected()) {
-					sex = "man";
-				} else {
-					sex = "woman";
-				}
-				String birthday = year.getText() + "-" + month.getText() + "-" + day.getText();
-				DBCollection coll = db.getCollection("student");
-				BasicDBObject doc = new BasicDBObject("id", id.getText()).
-                    append("name", name.getText()).
-                    append("sex", sex).
-                    append("age", age.getText()).
-                    append("birthday", birthday).
-                    append("college", college.getText());
-
-				coll.insert(doc);
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == btOk) {
+			String sex;
+			if (man.isSelected()) {
+				sex = "man";
+			} else {
+				sex = "woman";
 			}
-			if (e.getSource() == btCancle) {
-
-			}
-			setVisible(false);
+			String birthday = year.getText() + "-" + month.getText() + "-" + day.getText();
+			DBCollection coll = db.getCollection("student");
+			BasicDBObject doc = new BasicDBObject("id", id.getText()).
+                   append("name", name.getText()).
+                   append("sex", sex).
+                   append("age", age.getText()).
+                   append("birthday", birthday).
+                   append("college", college.getText());
+			coll.insert(doc);
+			this.setVisible(false);
 		}
-	
+		if (e.getSource() == btCancle) {
+			this.setVisible(false);
+		}
+	}
 }
